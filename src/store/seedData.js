@@ -1,7 +1,7 @@
 // 初始种子数据：把 src/data/graphData.js 的硬编码数据转换成统一数据模型。
 // 本地模式由 server/seed.js 用它生成 confirmed/*.md；在线模式由 indexedDbAdapter 用它做初始展示数据。
 import { nodes, edges, stages } from "../data/graphData.js";
-import { SCHEMA_VERSION } from "./types.js";
+import { SCHEMA_VERSION, ZONE } from "./types.js";
 
 export function mapEdgeType(label) {
   if (/归纳|综合|总结/.test(label)) return "supports";
@@ -10,9 +10,9 @@ export function mapEdgeType(label) {
 }
 
 export function seedGraph() {
-  const nodeList = nodes.map(({ detail, x, y, ...meta }) => ({
+  const nodeList = nodes.map(({ detail, x, y, status, ...meta }) => ({
     ...meta,
-    status: "confirmed",
+    status: status || ZONE.CONFIRMED,
     position: { x, y },
     schemaVersion: SCHEMA_VERSION,
     body: detail || "",
