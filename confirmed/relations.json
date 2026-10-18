@@ -1,0 +1,23 @@
+[
+  {
+    "id": "edge-mvdpum5j-en72d",
+    "source": "synthesis",
+    "target": "model",
+    "type": "extends",
+    "label": ""
+  },
+  {
+    "id": "e13",
+    "source": "model",
+    "target": "model-consistency",
+    "label": "细化",
+    "type": "extends"
+  },
+  {
+    "id": "e14",
+    "source": "model",
+    "target": "model-training",
+    "label": "细化",
+    "type": "extends"
+  }
+]
