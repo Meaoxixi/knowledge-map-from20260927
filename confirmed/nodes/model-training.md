@@ -1,11 +1,11 @@
 ---
 id: model-training
-title: 训练与推理关键问题
+title: 世界模型
 short: 训练 / 推理
 type: detail
 stage: oct
 level: 3
-summary: 定位训练目标、采样策略和推理效率的权衡。
+summary: 演变
 tags:
   - 模型
 status: confirmed

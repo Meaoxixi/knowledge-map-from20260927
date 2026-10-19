@@ -8,7 +8,7 @@ export default function Canvas({
   svgRef,
   pan, scale,
   visibleNodes, shownEdges, edges,
-  nodeMap, adjacent,
+  nodeMap, focusIds,
   selectedId,
   linkMode, linkSource,
   levelLabel, zoneFilter,
@@ -62,8 +62,9 @@ export default function Canvas({
             const a = nodeMap[e.source], b = nodeMap[e.target];
             if (!a || !b) return null;
             const midY = (a.position.y + b.position.y) / 2;
-            const active = adjacent.has(e.source) && adjacent.has(e.target);
-            const dim = selectedId && !active && (adjacent.has(e.source) || adjacent.has(e.target));
+            // 选中后聚焦：两端都在同一时间阶段的边高亮，其余变暗
+            const active = focusIds && focusIds.has(e.source) && focusIds.has(e.target);
+            const dim = !!selectedId && !active;
             return (
               <g key={e.id} className={`edge ${active ? "edge-active" : ""} ${dim ? "edge-dim" : ""}`}>
                 <path d={`M${a.position.x} ${a.position.y + 18} C${a.position.x} ${midY}, ${b.position.x} ${midY}, ${b.position.x} ${b.position.y - 18}`} />
@@ -91,12 +92,14 @@ export default function Canvas({
             const isDraft = n.status === ZONE.WORKSPACE;
             // 工作区视图下，正式节点变暗作为背景参考（与选中交互解耦）
             const isDimmed = zoneFilter === ZONE.WORKSPACE && n.status === ZONE.CONFIRMED;
+            // 选中后聚焦：非同一时间阶段的节点变暗
+            const isMuted = focusIds && !focusIds.has(n.id);
 
             return (
               <g
                 key={n.id}
                 data-node="true"
-                className={`node ${selectedNow ? "selected" : ""} ${isDraft ? "draft-node" : ""} ${isDimmed ? "confirmed-dim" : ""} ${isLinkSource ? "link-source" : ""}`}
+                className={`node ${selectedNow ? "selected" : ""} ${isDraft ? "draft-node" : ""} ${isDimmed ? "confirmed-dim" : ""} ${isMuted ? "muted" : ""} ${isLinkSource ? "link-source" : ""}`}
                 transform={`translate(${px} ${py})`}
                 onClick={() => linkMode ? onLinkNodeClick(n.id) : onSelectNode(n.id)}
                 onPointerDown={e => onNodeDragStart(e, n.id)}

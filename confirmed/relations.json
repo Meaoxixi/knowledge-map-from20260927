@@ -1,8 +1,22 @@
 [
   {
-    "id": "edge-mvdpum5j-en72d",
-    "source": "synthesis",
-    "target": "model",
+    "id": "e14",
+    "source": "model",
+    "target": "model-training",
+    "label": "细化",
+    "type": "extends"
+  },
+  {
+    "id": "edge-mvf7f8an-3vuf4",
+    "source": "model-consistency",
+    "target": "node-mvf73pft-3ilq2",
+    "type": "extends",
+    "label": ""
+  },
+  {
+    "id": "edge-mvf7f45o-42kmn",
+    "source": "model-consistency",
+    "target": "node-mvf73r6w-3r0tl",
     "type": "extends",
     "label": ""
   },
@@ -14,10 +28,24 @@
     "type": "extends"
   },
   {
-    "id": "e14",
-    "source": "model",
-    "target": "model-training",
-    "label": "细化",
-    "type": "extends"
+    "id": "edge-mvdpum5j-en72d",
+    "source": "synthesis",
+    "target": "model",
+    "type": "extends",
+    "label": ""
+  },
+  {
+    "id": "edge-mvdpyd50-zmu09",
+    "source": "synthesis",
+    "target": "evaluation",
+    "type": "extends",
+    "label": ""
+  },
+  {
+    "id": "edge-mvdpy9xv-o685e",
+    "source": "synthesis",
+    "target": "data",
+    "type": "extends",
+    "label": ""
   }
 ]

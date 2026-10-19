@@ -31,8 +31,8 @@ export default function Topbar({
   return (
     <header className="topbar">
       <div>
-        <div className="eyebrow">PERSONAL KNOWLEDGE MAP <span className="live-dot" /> {mode === "local" ? "LOCAL" : "BROWSER"}</div>
-        <h1>知识演化<span> / </span>研究地图</h1>
+        <div className="eyebrow"> MAP <span className="live-dot" /> {mode === "local" ? "LOCAL" : "BROWSER"}</div>
+        <h1>Progress</h1>
       </div>
       <div className="top-actions">
         <div className="zone-switch">

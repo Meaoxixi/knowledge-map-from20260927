@@ -12,7 +12,7 @@ export default function Inspector({
   edges, nodeMap,
   saveState, modeLabel, nodeCount, edgeCount,
   readOnly, hideZoneToggle, onUnlock,
-  onTitleChange, onSummaryChange, onBodyChange, onTagsChange, onTogglePreview,
+  onTitleChange, onSummaryChange, onBodyChange, onTagsChange, onDateChange, onTogglePreview,
   onSave, onCreateBranch, onToggleZone, onRemoveNode,
   onSelectNode, onRemoveEdge, onClose,
 }) {
@@ -20,14 +20,15 @@ export default function Inspector({
     <aside className="inspector">
       <div className="resize-handle" ref={handleRef} />
       <div className="inspector-head">
-        <div><div className="eyebrow">NODE INSPECTOR</div><h3>知识详情</h3></div>
-        <div className="inspector-head-actions"><GitBranch size={17}/><button className="icon-button" onClick={onClose} title="收起知识详情"><ChevronRight size={16}/></button></div>
+        <div><div className="eyebrow">NODE INSPECTOR</div><h3>笔记内容</h3></div>
+        <div className="inspector-head-actions"><GitBranch size={17}/><button className="icon-button" onClick={onClose} title="收起笔记内容"><ChevronRight size={16}/></button></div>
       </div>
 
       {selected && draft ? <>
         <div className="detail-type">
           <span className="type-dot" style={{ background: COLORS[selected.type] }}/>{NODE_TYPES[selected.type] || selected.type}
           <span className={`status-badge ${selected.status}`}>{selected.status === ZONE.CONFIRMED ? "确认区" : "工作区"}</span>
+          {draft.date && <span className="date-badge">{draft.date}</span>}
         </div>
 
         {readOnly && (
@@ -39,7 +40,7 @@ export default function Inspector({
             <h2 className="detail-title">{draft.title}</h2>
             <p className="detail-summary">{draft.summary}</p>
 
-            <div className="detail-section">
+            <div className="detail-section body-section">
               <div className="section-label">正文 / MARKDOWN</div>
               <div className="md-sheet"><Markdown remarkPlugins={[remarkGfm]}>{draft.body || "*（暂无内容）*"}</Markdown></div>
             </div>
@@ -58,6 +59,11 @@ export default function Inspector({
             <input className="detail-summary-input" value={draft.summary} onChange={e => onSummaryChange(e.target.value)} placeholder="一句话摘要" />
 
             <div className="detail-section">
+              <div className="section-label">编写日期 / DATE</div>
+              <input className="tags-input" type="date" value={draft.date} onChange={e => onDateChange(e.target.value)} />
+            </div>
+
+            <div className="detail-section body-section">
               <div className="section-label">
                 正文 / MARKDOWN
                 <button className="mini-toggle" onClick={onTogglePreview}>{previewBody ? <PenLine size={12}/> : <Eye size={12}/>}{previewBody ? "编辑" : "预览"}</button>

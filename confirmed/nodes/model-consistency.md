@@ -1,17 +1,19 @@
 ---
 id: model-consistency
-title: 生成一致性与稳定性
+title: 3D 视觉几何
 short: 一致性
 type: detail
 stage: oct
 level: 3
-summary: 从单帧质量扩展到跨帧、跨动作的稳定性。
+summary: 空间理解基座
 tags:
-  - 模型
+  - 视觉底座
 status: confirmed
 position:
   x: 150
   'y': 1110
 schemaVersion: 1
+date: '2026-09-11'
 ---
-可建立场景身份、几何结构、运动轨迹和物理规律等维度，并明确每个维度的可计算定义与失败案例。
+- VGGT-Ω
+- π³

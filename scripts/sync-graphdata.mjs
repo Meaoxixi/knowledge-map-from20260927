@@ -68,6 +68,7 @@ const nodes = allNodes.map((n) => ({
   detail: (n.body || "").trim(),
   tags: n.tags || [],
   status: n.status || "confirmed",
+  date: n.date || "",
 }));
 
 const edges = allEdges.map((e) => ({

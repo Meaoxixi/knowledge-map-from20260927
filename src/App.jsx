@@ -1,7 +1,7 @@
 // 顶层状态容器：数据加载、状态管理、业务逻辑，组装子组件。
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { VIEWBOX, isVisibleAtStage, semanticLevel, semanticDepth, fitView, MIN_SCALE, MAX_SCALE } from "./utils/layout";
+import { VIEWBOX, semanticLevel, semanticDepth, fitView, MIN_SCALE, MAX_SCALE } from "./utils/layout";
 import { initStore, getMode, api } from "./store/api";
 import { ZONE } from "./store/types";
 import { RAIL_W, MAP_MIN_W } from "./constants";
@@ -25,6 +25,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [expanded, setExpanded] = useState(() => new Set());
   const [collapsed, setCollapsed] = useState(() => new Set());
+  const [focusMonth, setFocusMonth] = useState(null); // 聚焦的"年份-月份"；null = 全部高亮
   const [query, setQuery] = useState("");
   const [light, setLight] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -86,14 +87,10 @@ export default function App() {
   }, []);
 
   // ---- 派生数据 ----
-  const stageOrder = useMemo(() => Object.fromEntries(stages.map((s, i) => [s.id, i])), [stages]);
   const nodeMap = useMemo(() => Object.fromEntries(nodes.map(n => [n.id, n])), [nodes]);
-  const currentStage = stages.find(s => s.id === stageId);
 
-  const visibleByTime = useMemo(
-    () => new Set(nodes.filter(n => isVisibleAtStage(n, stageId, stageOrder)).map(n => n.id)),
-    [nodes, stageId, stageOrder]
-  );
+  // 所有节点始终可见（时间维度改为"按月聚焦高亮"，不再按阶段隐藏节点）
+  const visibleByTime = useMemo(() => new Set(nodes.map(n => n.id)), [nodes]);
 
   const visibleNodes = useMemo(() => {
     // 区域过滤：工作区视图显示所有节点（正式节点变暗）；全部/确认区视图只显示正式节点
@@ -144,11 +141,30 @@ export default function App() {
   const shownEdges = useMemo(() => edges.filter(e => visibleIds.has(e.source) && visibleIds.has(e.target)), [edges, visibleIds]);
   const selected = nodeMap[selectedId];
 
-  const adjacent = useMemo(() => {
-    const ids = new Set([selectedId]);
-    edges.forEach(e => { if (e.source === selectedId) ids.add(e.target); if (e.target === selectedId) ids.add(e.source); });
-    return ids;
-  }, [selectedId, edges]);
+  // 阶段 id -> 年份-月份（如 aug -> "2026-08"）
+  const stageYm = useMemo(
+    () => Object.fromEntries(stages.map(s => [s.id, s.ym || (s.date ? String(s.date).split(".")[0] : "")])),
+    [stages]
+  );
+
+  // 节点所属的"年份-月份"：优先用节点手动录入的编写日期(YYYY-MM-DD)，否则回退到所属阶段。
+  const nodeMonth = useCallback((n) => {
+    if (n.date && /^\d{4}-\d{2}/.test(String(n.date))) return String(n.date).slice(0, 7);
+    return stageYm[n.stage] || null;
+  }, [stageYm]);
+
+  // 聚焦集合：focusMonth 为某"年份-月份"时，高亮属于该月的节点，其余变暗；null = 全部高亮。
+  const focusIds = useMemo(() => {
+    if (!focusMonth) return null;
+    return new Set(nodes.filter(n => nodeMonth(n) === focusMonth).map(n => n.id));
+  }, [focusMonth, nodes, nodeMonth]);
+
+  // 时间线月份：从所有节点的"年份-月份"自动聚合（优先手填日期，回退阶段），升序去重。
+  const months = useMemo(() => {
+    const set = new Set();
+    nodes.forEach(n => { const m = nodeMonth(n); if (m) set.add(m); });
+    return [...set].sort();
+  }, [nodes, nodeMonth]);
 
   const filteredNodes = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -198,10 +214,21 @@ export default function App() {
     setSelectedId(id);
     const n = nodeMap[id];
     if (n) {
-      setDraft({ title: n.title, summary: n.summary || "", body: n.body || "", tags: (n.tags || []).join(", ") });
+      setDraft({ title: n.title, summary: n.summary || "", body: n.body || "", tags: (n.tags || []).join(", "), date: n.date || "" });
       setPreviewBody(true);
       setReadOnly(n.status === ZONE.CONFIRMED);
+      setFocusMonth(nodeMonth(n)); // 点击节点时聚焦到它所属的年份-月份
     }
+  }
+
+  // 点击时间线某个月份：聚焦该月的笔记（高亮，其余变暗）
+  function handleSelectMonth(m) {
+    setFocusMonth(m);
+  }
+
+  // 点击时间线终点：显示全部节点（清除聚焦）
+  function handleFocusAll() {
+    setFocusMonth(null);
   }
 
   function focusNode(id) {
@@ -251,6 +278,7 @@ export default function App() {
       summary: draft.summary,
       body: draft.body,
       tags: draft.tags.split(/[,，]/).map(s => s.trim()).filter(Boolean),
+      date: draft.date || "",
     };
     api.updateNode(selected.id, patch)
       .then(updated => { setNodes(prev => prev.map(n => n.id === updated.id ? updated : n)); flashSave("saved"); })
@@ -452,7 +480,7 @@ export default function App() {
       className={`app ${light ? "theme-light" : ""}`}
       style={{ gridTemplateColumns: `${RAIL_W}px minmax(${MAP_MIN_W}px,1fr) ${inspectorOpen ? `${inspectorWidth}px` : "0px"}`, "--inspector-w": inspectorOpen ? `${inspectorWidth}px` : "0px" }}
     >
-      <Rail stages={stages} stageId={stageId} onSelectStage={setStageId} />
+      <Rail months={months} focusMonth={focusMonth} onSelectMonth={handleSelectMonth} onFocusAll={handleFocusAll} />
 
       <section className="workspace">
         <Topbar
@@ -473,14 +501,14 @@ export default function App() {
         />
 
         <div className="stage-banner">
-          <div className="stage-index">0{stages.findIndex(s => s.id === stageId) + 1}</div>
+          <div className="stage-index">{focusMonth ? `0${months.indexOf(focusMonth) + 1}` : "ALL"}</div>
           <div className="stage-copy">
-            <span className="eyebrow">{currentStage?.month || "—"} / LEARNING PHASE</span>
-            <h2>{currentStage?.title || "—"}</h2>
-            <p>{currentStage?.description || ""}</p>
+            <span className="eyebrow">{focusMonth || "ALL"} / MONTHLY NOTES</span>
+            <h2>{focusMonth || "全部节点"}</h2>
+            <p>{focusMonth ? `本月 ${focusIds ? focusIds.size : 0} 篇笔记` : `共 ${nodes.length} 篇笔记`}</p>
           </div>
           <div className="stage-progress">
-            {stages.map(s => <button key={s.id} className={s.id === stageId ? "current" : ""} onClick={() => setStageId(s.id)} aria-label={s.title} />)}
+            {months.map(m => <button key={m} className={m === focusMonth ? "current" : ""} onClick={() => setFocusMonth(m)} aria-label={m} />)}
           </div>
         </div>
 
@@ -501,7 +529,7 @@ export default function App() {
           shownEdges={shownEdges}
           edges={edges}
           nodeMap={nodeMap}
-          adjacent={adjacent}
+          focusIds={focusIds}
           selectedId={selectedId}
           linkMode={linkMode}
           linkSource={linkSource}
@@ -546,6 +574,7 @@ export default function App() {
           onSummaryChange={v => setDraft(d => ({ ...d, summary: v }))}
           onBodyChange={v => setDraft(d => ({ ...d, body: v }))}
           onTagsChange={v => setDraft(d => ({ ...d, tags: v }))}
+          onDateChange={v => setDraft(d => ({ ...d, date: v }))}
           onTogglePreview={() => setPreviewBody(v => !v)}
           onSave={saveNode}
           onCreateBranch={createBranch}
