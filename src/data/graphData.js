@@ -163,7 +163,7 @@ export const nodes = [
     "y": 1213.7613903428537,
     "level": 3,
     "summary": "排列等变视觉几何学习",
-    "detail": "![架构图](.\\public\\picture\\Π3.png)\n\n- register_token：nn.Parameter(torch.randn(1, 1, 5, self.dec_embed_dim))\n- 位姿信息通过对所有的patch做avgpool回归得到\n- reshape 同构异注意力计算方式\n(B×N, hw) 帧内\n(B, N×hw) 帧间\n\n> - π³: Scalable Permutation-Equivariant Visual Geometry Learning\n> - 团队：上海 AI Lab / 上海交大 / 浙大\n> - 年份：ICLR 2026\n> - 代码：https://github.com/yyfz/Pi3 \n> - 论文：arXiv 2507.13347",
+    "detail": "![架构图](./picture/Π3.png)\n\n- register_token：nn.Parameter(torch.randn(1, 1, 5, self.dec_embed_dim))\n- 位姿信息通过对所有的patch做avgpool回归得到\n- reshape 同构异注意力计算方式\n(B×N, hw) 帧内\n(B, N×hw) 帧间\n\n> - π³: Scalable Permutation-Equivariant Visual Geometry Learning\n> - 团队：上海 AI Lab / 上海交大 / 浙大\n> - 年份：ICLR 2026\n> - 代码：https://github.com/yyfz/Pi3 \n> - 论文：arXiv 2507.13347",
     "tags": [
       "排列等变",
       "前馈神经网络"

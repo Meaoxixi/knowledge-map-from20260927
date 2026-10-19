@@ -44,8 +44,8 @@
 .detail-title-input:focus,.detail-summary-input:focus{border-color:var(--accent)}
 .body-editor{width:100%;flex:1;min-height:0;background:var(--panel2);border:1px solid var(--border);border-radius:7px;color:var(--text);font:12px/1.8 "DM Mono",monospace;padding:12px;outline:0;resize:none}
 .body-editor:focus{border-color:var(--accent)}
-.body-section{flex:1;min-height:0;display:flex;flex-direction:column}
-.body-section .md-sheet{flex:1;overflow-y:auto}
+.body-section{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
+.body-section .md-sheet{flex:1;min-width:0;overflow-y:auto;overflow-x:hidden}
 .connections{display:flex;flex-direction:column;gap:2px;max-height:150px;overflow-y:auto}
 .tags-input{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;padding:8px 10px;outline:0}
 .tags-input:focus{border-color:var(--accent)}

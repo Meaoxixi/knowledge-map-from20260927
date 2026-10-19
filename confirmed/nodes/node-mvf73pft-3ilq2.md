@@ -19,7 +19,7 @@ date: '2026-10-01'
 
 
 
-![架构图](.\public\picture\Π3.png)
+![架构图](./picture/Π3.png)
 
 - register_token：nn.Parameter(torch.randn(1, 1, 5, self.dec_embed_dim))
 - 位姿信息通过对所有的patch做avgpool回归得到
