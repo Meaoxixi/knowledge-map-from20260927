@@ -85,7 +85,10 @@ export default function Canvas({
             const overview = scale < .48;
             const baseRadius = n.type === "root" || n.type === "final" ? 10 : n.type === "summary" ? 8 : n.level === 2 ? 6 : 4.5;
             const radius = selectedNow ? baseRadius * 1.45 : baseRadius;
-            const labelWidth = Math.min(245, Math.max(118, n.title.length * 13 + 22));
+            const titleText = n.title.length > 24 && scale < .88 ? (n.short || n.title) : n.title;
+            const summaryText = showDetail ? ((n.summary || "").length > 24 ? n.summary.slice(0, 23) + "…" : (n.summary || "")) : "";
+            // 方框宽度按标题(12px/字)与摘要(10px/字)中更长的那个自适应，上限 280
+            const labelWidth = Math.min(280, Math.max(118, Math.max(titleText.length * 13, summaryText.length * 10) + 22));
             const labelX = px > 760 ? -labelWidth - 12 : px < 440 ? 12 : -labelWidth / 2;
             const textX = labelX + (px > 760 ? labelWidth - 8 : 8);
             const textAnchor = px > 760 ? "end" : "start";
@@ -118,8 +121,8 @@ export default function Canvas({
                 {isLinkSource && <circle r={radius + 8} className="node-link-ring" stroke={color} />}
                 {showText && !overview && <g className="node-label-group">
                   <rect x={labelX} y="17" width={labelWidth} height={showDetail ? 58 : 39} rx="7" className={`label-bg ${selectedNow ? "label-selected" : ""}`}/>
-                  <text x={textX} y="33" textAnchor={textAnchor} className="node-title">{n.title.length > 24 && scale < .88 ? (n.short || n.title) : n.title}</text>
-                  {showDetail && <text x={textX} y="51" textAnchor={textAnchor} className="node-summary">{(n.summary || "").length > 32 ? n.summary.slice(0, 31) + "…" : n.summary}</text>}
+                  <text x={textX} y="33" textAnchor={textAnchor} className="node-title">{titleText}</text>
+                  {showDetail && <text x={textX} y="51" textAnchor={textAnchor} className="node-summary">{summaryText}</text>}
                 </g>}
                 {showText && hasChildren && !linkMode && (
                   <g

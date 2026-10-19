@@ -35,7 +35,7 @@ export const stages = [
 export const nodes = [
   {
     "id": "survey",
-    "title": "工业界与学术界路线对比",
+    "title": "路线对比",
     "short": "路线对比",
     "type": "topic",
     "stage": "aug",
@@ -53,7 +53,7 @@ export const nodes = [
   },
   {
     "id": "synthesis",
-    "title": "技术路线、能力边界与关键挑战",
+    "title": "关键挑战",
     "short": "关键挑战",
     "type": "summary",
     "stage": "aug",
@@ -104,20 +104,38 @@ export const nodes = [
   },
   {
     "id": "model",
-    "title": "模型层面",
+    "title": "训推",
     "short": "模型",
     "type": "branch",
     "stage": "sep",
     "x": 270,
     "y": 945,
     "level": 2,
-    "summary": "架构、时序建模、生成能力与一致性。",
+    "summary": "架构、训练、推理",
     "detail": "关注模型架构与状态表示、长时序一致性、可控生成、推理成本，以及训练和推理中的关键瓶颈。",
     "tags": [
       "模型开发"
     ],
     "status": "confirmed",
     "date": ""
+  },
+  {
+    "id": "diffusion-forcing",
+    "title": "Diffusion Forcing",
+    "short": "Diffusion Forcing",
+    "type": "detail",
+    "stage": "oct",
+    "x": 350.4488857803502,
+    "y": 1379.8294912658275,
+    "level": 3,
+    "summary": "扩散强制：统一 next-token 预测与全序列扩散的训练范式。",
+    "detail": "> 论文：Diffusion Forcing: Next-token Prediction Meets Full-Sequence Diffusion（MIT CSAIL, NeurIPS 2024）\n\n核心思想：通过不同噪声水平统一「逐 token 自回归预测」和「全序列扩散」，让模型既能逐步推理、又能全局生成。\n\n（此处补充学习笔记）",
+    "tags": [
+      "扩散",
+      "视频生成"
+    ],
+    "status": "confirmed",
+    "date": "2026-10-20"
   },
   {
     "id": "model-consistency",
@@ -142,21 +160,21 @@ export const nodes = [
     "short": "训练 / 推理",
     "type": "detail",
     "stage": "oct",
-    "x": 350,
-    "y": 1110,
+    "x": 521.3016715488328,
+    "y": 1120.168592375045,
     "level": 3,
-    "summary": "演变",
+    "summary": "演变起点：视频生成 + 扩散训练范式",
     "detail": "记录训练目标、推理延迟、显存占用、可控性与质量的权衡。具体问题应由实验或可靠来源支持。\n训练范式也很多",
     "tags": [
       "模型"
     ],
     "status": "confirmed",
-    "date": ""
+    "date": "2026-09-21"
   },
   {
     "id": "node-mvf73pft-3ilq2",
-    "title": "π³",
-    "short": "π³",
+    "title": "Π3",
+    "short": "Π3",
     "type": "detail",
     "stage": "oct",
     "x": 245.37266317715137,
@@ -190,41 +208,49 @@ export const nodes = [
   },
   {
     "id": "node-mvf9rvkx-gfr84",
-    "title": "因果世界模型",
-    "short": "因果世界模型",
+    "title": "原生Dit",
+    "short": "原生Dit",
     "type": "detail",
     "stage": "oct",
-    "x": 602,
-    "y": 1221,
+    "x": 524.1298629725512,
+    "y": 1270.4418615912741,
     "level": 3,
     "summary": "",
-    "detail": "",
+    "detail": "[[diffusion-forcing|eg.]],[[node-mvfs29zw-6gn26__Wan2.2|eg.]]",
     "tags": [],
-    "status": "workspace",
+    "status": "confirmed",
+    "date": "2026-09-21"
+  },
+  {
+    "id": "node-mvfs29zw-6gn26",
+    "title": "Wan2.2",
+    "short": "Wan2.2",
+    "type": "detail",
+    "stage": "oct",
+    "x": 726.4261899518007,
+    "y": 1371.394969657099,
+    "level": 3,
+    "summary": "",
+    "detail": "key: 原生Dit，MoE，Flowmatching\n\n![架构](./picture/wan2.2.png)\n\n> 代码：[仓库地址](https://github.com/Wan-Video/Wan2.2)\n> 团队：阿里巴巴通义实验室\n```python\nWan2.2/\n├── ...                      \n└── wan/                        # 核心代码包 ★\n    ├── __init__.py             # 包初始化，导出4个Pipeline类\n    ├── configs/                # 模型配置（分辨率/参数/路径）\n    │   └── __init__.py           ## WAN_CONFIGS, SIZE_CONFIGS, MAX_AREA_CONFIGS\n    │\n    ├── distributed/            # 分布式推理工具 —— 6\n    │   └── util.py               ## init_distributed_group, FSDP, Ulysses\n    │\n    ├── modules/                # 核心模块 ★★\n    │   ├── vae2_1.py             ## Wan2.1 VAE（128×压缩，16通道）—— 1\n    │   ├── vae2_2.py             ## Wan2.2 VAE（1024×压缩，48通道）—— 2\n    │   ├── dit/                # DiT模型定义\n    │   │   ├── wan2_1.py         ## Wan2.1 DiT（单一14B Dense模型）—— 3\n    │   │   └── wan2_2.py         ## Wan2.2 DiT（MoE双专家）—— 4\n    │   └── animate/            # Animate模块\n    │       └── preprocess/       ## 姿态预处理\n    │\n    ├── utils/                  # 工具函数\n    │   ├── prompt_extend.py      ## Prompt扩展（DashScope/Qwen）\n    │   └── utils.py              ## save_video, merge_video_audio等\n    │\n    ├── text2video.py           # WanT2V Pipeline ★\n    ├── image2video.py          # WanI2V Pipeline ★\n    ├── textimage2video.py      # WanTI2V Pipeline ★\n    └── speech2video.py         # WanS2V Pipeline ★\n```\n\n## 1. `modules/vae2_1.py`（128×压缩）\n```python\nclass Wan2_1_VAE(nn.Module):\n    \"\"\"3D因果VAE — 时间4×压缩, 空间8×压缩, 16通道, 总128倍\"\"\"\n\n    def __init__(self, vae_pth, device='cuda'):\n        super().__init__()\n        self.encoder = Encoder3D(\n            dim=128,                    # 基础通道数\n            z_dim=4,                    # 单组件潜变量通道(实际×2=8→最终16)\n            dim_mult=[1, 2, 4, 4],      # 4级下采样通道变化: 128→256→512→512\n            num_res_blocks=2,\n            attn_scales=[],             # 注意力注入尺度(空=不注入)\n            temperal_downsample=[True, True, False],  # ★ 第1,2级做时间下采样\n            dropout=0.0,\n        )\n        self.decoder = Decoder3D(...)\n        # GroupNorm → RMSNorm (关键：保证因果性)\n        # 空间上采样层通道减半：推理内存再降33%\n\n#####################################################\n\"\"\" 编码流程\n输入: x ∈ R^{B×3×(1+T)×H×W}   (像素空间)\n  ↓ patchify(1,2,2) — 无patchify，直接3D卷积\n  ↓ Encoder3D:\n  │─ Level 1: dim 128→256, 时间下采样2×, 空间下采样2×\n  │─ Level 2: dim 256→512, 时间下采样2×, 空间下采样2×\n  │─ Level 3: dim 512→512, 无时间下采样, 空间下采样2×\n  │─ Level 4: dim 512→512, 无下采样(残差块)\n  ↓ Conv3D(z_dim*2)  → mu, log_var\n  ↓ 重参数化: z = mu + sigma * noise\n  ↓ 归一化: z = (z - scale[0]) * scale[1]\n输出: z ∈ R^{B×16×(1+T/4)×H/8×W/8}   (潜变量空间)\n\"\"\"\n#####################################################\n```\n\n\n## 2. `modules/vae2_2.py`（1024×压缩）\n```python\nclass Wan2_2_VAE(nn.Module):\n    \"\"\"高压缩VAE — 时间4×, 空间16×(含patchify 2×), 48通道, 总1024倍\"\"\"\n\n    def __init__(self, vae_pth, device='cuda'):\n        super().__init__()\n        self.patch_size = (1, 2, 2)  # ★ 时间1, 空间2×2\n\n        self.encoder = Encoder3D(\n            dim=128,\n            z_dim=4,\n            dim_mult=[1, 2, 4, 4],\n            num_res_blocks=2,\n            temperal_downsample=[True, True, False],  # 同Wan2.1\n            # 但多了patchify预压缩！\n        )\n        # 通道数: 16 → 48（补偿高压缩信息损失）\n\n\n# Patchify额外压缩：\ndef patchify(x, patch_size=(1, 2, 2)):\n    \"\"\"空间2×2打patch → 空间额外4倍压缩\"\"\"\n    if x.dim() == 5:  # [B, C, F, H, W]\n        x = rearrange(x, \"b c f (hq wq) w -> b (c hq wq) f h w\",\n                       hq=patch_size[1], wq=patch_size[2])\n    return x\n\n```\n\n|            | Wan2.1 VAE | Wan2.2 VAE |\n| ---------- | ---------- | ---------- |\n| 时间下采样 | 4×         |     4×        |\n| 空间卷积下采样           |   8×         |      8×      |\n| Patchify           |    \\        |    4x        |\n| 总空间           |      8x      |     16x       |\n| 总压缩           |    4*8=32× (×通道)\t       | 4×16=64× (×通道)           |\n| 通道数           |    16        |     48       |\n| 最终压缩比           |  128x          |   1024x         |\n\n\n## 3. `modules/dit/wan2_1.py`: 单一Dense模型\n```python\nclass Wan2_1_DiT(nn.Module):\n    \"\"\"Wan2.1 DiT: 单一14B参数的Dense DiT模型\"\"\"\n\n    def __init__(self, config):\n        super().__init__()\n        self.patch_size = (1, 2, 2)\n        self.in_channels = 16          # VAE潜变量通道\n        self.out_channels = 16\n        self.hidden_size = 5120        # 隐藏维度\n        self.num_heads = 40            # 注意力头数\n        self.num_layers = 40           # Transformer层数\n\n        # Patchify：3D Conv (1,2,2)\n        self.patch_embedding = nn.Conv3d(\n            in_channels, hidden_size, kernel_size=(1,2,2), stride=(1,2,2))\n\n        # Transformer Blocks\n        self.blocks = nn.ModuleList([\n            WanTransformerBlock(hidden_size, num_heads, ...)\n            for _ in range(num_layers)\n        ])\n\n        # Un-patchify\n        self.unpatch = nn.Linear(hidden_size, patch_size[1]*patch_size[2]*out_channels)\n\n        # 共享时间步MLP（★关键设计：参数减少25%）\n        self.shared_mlp = nn.Sequential(\n            nn.Linear(hidden_size, hidden_size * 6),\n            nn.SiLU(),\n            nn.Linear(hidden_size * 6, hidden_size * 6),\n        )\n\n########################################\n# Transformer Block结构\n########################################\nclass WanTransformerBlock(nn.Module):\n    def __init__(self, hidden_size, num_heads, ...):\n        # 1. Cross-Attention：注入文本条件\n        self.cross_attn = Attention(hidden_size, num_heads)\n\n        # 2. Full Self-Attention：全局时空建模（非因果！）\n        self.self_attn = Attention(hidden_size, num_heads)\n\n        # 3. FFN/MLP\n        self.ffn = FeedForward(hidden_size)\n\n        # 4. 时间步调制（共享MLP + 块专属偏置）\n        self.shift_bias = nn.Parameter(torch.zeros(hidden_size * 6))\n\n    def forward(self, x, text_emb, timestep_emb):\n        # 时间步调制：6个参数（scale, shift, gate各×2）\n        mod_params = self.shared_mlp(timestep_emb) + self.shift_bias\n        shift_msa, scale_msa, gate_msa, shift_mlp, scale_mlp, gate_mlp = \\\n            mod_params.chunk(6, dim=-1)\n\n        # Cross-Attention ← 文本\n        x = x + gate_msa * self.cross_attn(\n            norm(x) * (1 + scale_msa) + shift_msa, text_emb)\n\n        # Self-Attention ← 全局\n        x = x + gate_msa * self.self_attn(norm(x))\n\n        # FFN\n        x = x + gate_mlp * self.ffn(norm(x) * (1 + scale_mlp) + shift_mlp)\n        return x\n```\n\n## 4. `modules/dit/wan2_2.py`: MoE(时间步路由)专家\n```python\nclass Wan2_2_DiT(nn.Module):\n    \"\"\"Wan2.2 MoE DiT: 高噪声专家 + 低噪声专家\"\"\"\n\n    def __init__(self, config):\n        super().__init__()\n        # ★ 两个独立的Dense DiT！\n        self.high_noise_model = Wan2_1_DiT(config)  # 高噪声专家 ~14B\n        self.low_noise_model = Wan2_1_DiT(config)   # 低噪声专家 ~14B\n        # 总参数 ~27B，但推理时仅14B活跃\n\n        self.t_moe = None  # ★ MoE切换阈值时间步（加载权重时设置）\n\n    def select_expert(self, t):\n        \"\"\"根据当前时间步选择专家\"\"\"\n        if t > self.t_moe:\n            return self.high_noise_model   # 高噪声阶段 → 布局专家\n        else:\n            return self.low_noise_model    # 低噪声阶段 → 细节专家\n\n    def forward(self, x, timestep, text_emb, **kwargs):\n        t = timestep.item() if isinstance(timestep, torch.Tensor) else timestep\n\n        # ★ 选择并加载对应专家\n        if t > self.t_moe:\n            model = self._load_expert('high_noise')\n        else:\n            model = self._load_expert('low_noise')\n\n        return model(x, timestep, text_emb, **kwargs)\n\n    def _load_expert(self, required_name):\n        \"\"\"显存管理：激活所需专家，卸载另一个\"\"\"\n        offload_name = 'low_noise_model' if required_name == 'high_noise_model' \\\n                        else 'high_noise_model'\n\n        if self.offload_model:\n            # 将非活跃专家卸载到CPU\n            if next(getattr(self, offload_name).parameters()).device.type == 'cuda':\n                getattr(self, offload_name).to('cpu')\n            # 将活跃专家加载到GPU\n            if next(getattr(self, required_name).parameters()).device.type == 'cpu':\n                getattr(self, required_name).to(self.device)\n\n        return getattr(self, required_name)\n```\nMoE切换点：SNR(t_moe) = SNR_min / 2\n- t_moe 通常设置在 ~800步（总1000步的前80%）, 推理时GPU上始终只有一个14B模型，显存占用不变\n- 去噪初期(t大, SNR低) → 高噪声专家\n- 去噪后期(t小, SNR高) → 低噪声专家\n\n\n## 5. Flow Matching调度器\n```python\nclass FlowMatchScheduler:\n    \"\"\"Rectified Flow调度器 — 线性插值噪声路径\"\"\"\n\n    def __init__(self, shift=5.0, num_train_timesteps=1000):\n        self.num_train_timesteps = num_train_timesteps\n        self.shift = shift  # ★ 时间步偏移，控制采样密度\n\n    def set_timesteps(self, num_inference_steps):\n        \"\"\"设置推理时间步 — 应用shift采样\"\"\"\n        timesteps = torch.linspace(\n            1.0, 0.0, num_inference_steps + 1)  # [1.0 → 0.0]\n        # ★ Shift采样：偏向中间时间步\n        timesteps = self._shift_schedule(timesteps)\n        self.timesteps = timesteps[:-1]\n\n    def _shift_schedule(self, timesteps):\n        \"\"\"Shift Schedule：对数正态偏移\n        使采样密度偏向中间时间步，同时关注粗布局和细细节\"\"\"\n        return 1.0 / (1.0 + (1.0 - timesteps) / timesteps * self.shift)\n\n    def step(self, model_output, timestep, sample):\n        \"\"\"ODE步进：x_{t-1} = x_t + v_pred * dt\"\"\"\n        dt = timestep - self.prev_timestep  # 时间步差\n        prev_sample = sample + model_output * dt\n        return prev_sample\n```\n- Rectified Flow使用线性路径（而非DDPM的弯曲路径），ODE采样更高效\n- shift参数控制时间步采样密度：偏向中间步既关注全局布局又照顾细节；Wan2.1 T2V-14B shift=5.0，Wan2.2 MoE可能使用不同的shift值\n- 推理仅需20-50步即可收敛（对比DDPM的1000步）\n\n## 6. `distributed/util.py`分布式推理\n```python\ndef init_distributed_group(args):\n    \"\"\"初始化分布式进程组\"\"\"\n    if args.ulysses_size > 1:\n        # Ulysses序列并行：沿注意力头分片\n        setup_ulysses(args.ulysses_size)\n\n    if args.dit_fsdp:\n        # DiT模块使用FSDP参数分片\n        wrap_dit_with_fsdp()\n\n    if args.t5_fsdp:\n        # T5编码器使用FSDP参数分片\n        wrap_t5_with_fsdp()\n```\n## 7. 架构\n```bash\n\n7.1 架构上的并行策略映射\n┌──────────────────────────────────────────────────────────┐\n│                    多GPU推理并行策略                      │\n├──────────────┬───────────────────────────────────────────┤\n│ VAE          │ DP（数据并行）— 显存小，无需分片             │\n│ T5 Encoder   │ FSDP（全分片数据并行）— >20GB显存需分片      │\n│ DiT (单专家)  │ FSDP + 2D-CP (Ulysses×RingAttention) + DP │\n│ DiT (MoE)    │ 同上 + 专家卸载（CPU↔GPU切换）              │\n└──────────────┴───────────────────────────────────────────┘\n\n\n7.2 流程图\n用户输入: prompt + (可选) image/audio\n         │\n         ▼\n┌─────────────────────────────────────────────────────────┐\n│  generate.py — 推理入口                                  │\n│  ├── 解析CLI参数                                         │\n│  ├── 初始化分布式 (FSDP / Ulysses / DP)                   │\n│  ├── 选择Pipeline (WanT2V / WanI2V / WanTI2V / WanS2V)  │\n│  └── Prompt扩展 (可选, DashScope/Qwen)                   │\n└─────────────────────┬───────────────────────────────────┘\n                      │\n                      ▼\n┌─────────────────────────────────────────────────────────┐\n│  Pipeline.generate()                                      │\n│                                                           │\n│  ┌─ Step 1: 文本编码 ─────────────────────────────────┐  │\n│  │  umT5-XXL → text_emb [B, L_text, D]                │  │\n│  │  (可选) T5放CPU节省显存                              │  │\n│  └──────────────────────────────────────────────────────┘  │\n│                                                           │\n│  ┌─ Step 2: VAE编码 (仅I2V/TI2V/S2V) ───────────────┐  │\n│  │  Wan2.1 VAE: x → z [B,16,T/4,H/8,W/8]  (128×)    │  │\n│  │  Wan2.2 VAE: x → z [B,48,T/4,H/16,W/16] (1024×)  │  │\n│  └──────────────────────────────────────────────────────┘  │\n│                                                           │\n│  ┌─ Step 3: 初始化噪声 ───────────────────────────────┐  │\n│  │  z_T ~ N(0, I)  [B, C, F, H', W']                │  │\n│  │  (I2V: 首帧替换为image_latent)                      │  │\n│  └──────────────────────────────────────────────────────┘  │\n│                                                           │\n│  ┌─ Step 4: Flow Matching去噪循环 ────────────────────┐  │\n│  │  for t in timesteps:                               │  │\n│  │    ┌─ MoE专家选择 (Wan2.2 A14B) ──────────────┐    │  │\n│  │    │  if t > t_moe → high_noise_model (14B)   │    │  │\n│  │    │  else        → low_noise_model  (14B)    │    │  │\n│  │    │  (非活跃专家卸载到CPU)                      │    │  │\n│  │    └────────────────────────────────────────────┘    │  │\n│  │                                                      │  │\n│  │    v_pred = DiT(z_t, t, text_emb)                  │  │\n│  │                                                      │  │\n│  │    ┌─ CFG (guidance_scale > 1) ────────────────┐    │  │\n│  │    │  v = v_uncond + s * (v_cond - v_uncond)   │    │  │\n│  │    └────────────────────────────────────────────┘    │  │\n│  │                                                      │  │\n│  │    z_{t-dt} = z_t + v * dt  (Rectified Flow ODE)   │  │\n│  └──────────────────────────────────────────────────────┘  │\n│                                                           │\n│  ┌─ Step 5: VAE解码 ──────────────────────────────────┐  │\n│  │  z_0 → VAE Decoder → video [B, 3, T, H, W]       │  │\n│  │  (分块解码，O(1)显存，支持无限长)                     │  │\n│  └──────────────────────────────────────────────────────┘  │\n└─────────────────────┬───────────────────────────────────┘\n                      │\n                      ▼\n┌─────────────────────────────────────────────────────────┐\n│  save_video() / merge_video_audio()                      │\n│  → MP4输出                                               │\n└─────────────────────────────────────────────────────────┘\n```",
+    "tags": [],
+    "status": "confirmed",
     "date": "2026-10-01"
   }
 ];
 
 export const edges = [
   {
+    "id": "edge-mvfs27c0-k887i",
+    "source": "model-training",
+    "target": "node-mvf9rvkx-gfr84",
+    "label": "",
+    "type": "extends"
+  },
+  {
     "id": "e14",
     "source": "model",
     "target": "model-training",
     "label": "细化",
-    "type": "extends"
-  },
-  {
-    "id": "edge-mvf7f8an-3vuf4",
-    "source": "model-consistency",
-    "target": "node-mvf73pft-3ilq2",
-    "label": "",
-    "type": "extends"
-  },
-  {
-    "id": "edge-mvf7f45o-42kmn",
-    "source": "model-consistency",
-    "target": "node-mvf73r6w-3r0tl",
-    "label": "",
     "type": "extends"
   },
   {
@@ -242,6 +268,20 @@ export const edges = [
     "type": "extends"
   },
   {
+    "id": "edge-mvf7f8an-3vuf4",
+    "source": "model-consistency",
+    "target": "node-mvf73pft-3ilq2",
+    "label": "",
+    "type": "extends"
+  },
+  {
+    "id": "edge-mvf7f45o-42kmn",
+    "source": "model-consistency",
+    "target": "node-mvf73r6w-3r0tl",
+    "label": "",
+    "type": "extends"
+  },
+  {
     "id": "edge-mvdpyd50-zmu09",
     "source": "synthesis",
     "target": "evaluation",
@@ -254,5 +294,19 @@ export const edges = [
     "target": "data",
     "label": "",
     "type": "extends"
+  },
+  {
+    "id": "ref-node-mvf9rvkx-gfr84-diffusion-forcing",
+    "source": "node-mvf9rvkx-gfr84",
+    "target": "diffusion-forcing",
+    "label": "eg.",
+    "type": "reference"
+  },
+  {
+    "id": "ref-node-mvf9rvkx-gfr84-node-mvfs29zw-6gn26",
+    "source": "node-mvf9rvkx-gfr84",
+    "target": "node-mvfs29zw-6gn26",
+    "label": "eg.",
+    "type": "reference"
   }
 ];

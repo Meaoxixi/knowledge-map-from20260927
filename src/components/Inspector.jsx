@@ -1,8 +1,9 @@
 // 右侧详情面板：节点编辑、正文预览/编辑、标签、关系列表、操作按钮、分栏把手。
 // 做法 B：确认区节点默认只读，点「编辑」临时解锁，改完仍留在确认区。
+import { useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { GitBranch, ChevronRight, X, Plus, Save, Trash2, FolderInput, PenLine, Eye, Lock, Unlock } from "lucide-react";
+import { GitBranch, ChevronRight, X, Plus, Save, Trash2, FolderInput, PenLine, Eye, Lock, Unlock, Pencil } from "lucide-react";
 import { COLORS } from "../constants";
 import { ZONE, NODE_TYPES, EDGE_TYPES } from "../store/types";
 
@@ -14,8 +15,23 @@ export default function Inspector({
   readOnly, hideZoneToggle, onUnlock,
   onTitleChange, onSummaryChange, onBodyChange, onTagsChange, onDateChange, onTogglePreview,
   onSave, onCreateBranch, onToggleZone, onRemoveNode,
-  onSelectNode, onRemoveEdge, onClose,
+  onSelectNode, onRemoveEdge, onUpdateEdge, onClose,
 }) {
+  const [editingEdge, setEditingEdge] = useState(null); // { id, label }
+  const [editLabel, setEditLabel] = useState("");
+
+  function startEdit(e) {
+    setEditingEdge({ id: e.id });
+    setEditLabel(e.label || "");
+  }
+  function saveEdit() {
+    if (editingEdge) onUpdateEdge(editingEdge.id, editLabel.trim());
+    setEditingEdge(null);
+  }
+  function cancelEdit() {
+    setEditingEdge(null);
+  }
+
   return (
     <aside className="inspector">
       <div className="resize-handle" ref={handleRef} />
@@ -97,7 +113,26 @@ export default function Inspector({
                     </span>
                     <ChevronRight size={14}/>
                   </button>
-                  {!readOnly && <button className="conn-del" onClick={() => onRemoveEdge(e.id)} title="删除关系"><X size={13}/></button>}
+                  {!readOnly && (
+                    <>
+                      <button className="conn-edit" onClick={() => startEdit(e)} title="编辑关系说明"><Pencil size={13}/></button>
+                      <button className="conn-del" onClick={() => onRemoveEdge(e.id)} title="删除关系"><X size={13}/></button>
+                    </>
+                  )}
+                  {editingEdge?.id === e.id && (
+                    <div className="edge-edit-row">
+                      <input
+                        className="tags-input"
+                        value={editLabel}
+                        onChange={ev => setEditLabel(ev.target.value)}
+                        autoFocus
+                        placeholder="关系说明，如：借鉴了MoE设计"
+                        onKeyDown={ev => { if (ev.key === "Enter") saveEdit(); if (ev.key === "Escape") cancelEdit(); }}
+                      />
+                      <button className="mini-toggle" onClick={saveEdit}>保存</button>
+                      <button className="mini-toggle" onClick={cancelEdit}>取消</button>
+                    </div>
+                  )}
                 </div>
               );
             })}

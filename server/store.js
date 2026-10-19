@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { markdownToNode, nodeToMarkdown } from "../src/store/markdown.js";
+import { markdownToNode, nodeToMarkdown, extractReferences } from "../src/store/markdown.js";
 import { ZONE, genId, SCHEMA_VERSION } from "../src/store/types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -32,6 +32,24 @@ function safeName(id) {
   return s || "node";
 }
 
+// 把标题转成安全的文件名片段（保留中文与 Unicode，只清洗文件系统非法字符）
+function safeTitle(title) {
+  const s = String(title || "")
+    .replace(/[\\/:*?"<>|\r\n\t]/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return s;
+}
+
+// 节点 -> 文件名：id__标题.md（可读；id 仍是唯一锚点）
+function nodeFileName(node) {
+  const base = safeName(node.id);
+  const title = safeTitle(node.title);
+  return title ? `${base}__${title}.md` : `${base}.md`;
+}
+
 function nodesDir(zone) {
   return path.join(zoneDir(zone), "nodes");
 }
@@ -51,6 +69,20 @@ function writeJson(file, data) {
 
 // ---------- 节点 ----------
 
+// 清洗节点：给缺失关键字段的节点兜底默认值，避免前端渲染崩溃。
+// 手动建的 md 若漏写 position/status/title，不至于让整个画布崩掉。
+function sanitizeNode(node, fallbackZone) {
+  const pos = node.position;
+  if (!pos || typeof pos.x !== "number" || typeof pos.y !== "number") {
+    node.position = { x: 600, y: 400 };
+  }
+  if (!node.status) node.status = fallbackZone;
+  if (!node.title) node.title = node.id;
+  if (node.level === undefined) node.level = 3;
+  if (!node.type) node.type = "detail";
+  return node;
+}
+
 // 扫描某个区域下的所有 .md，返回节点对象数组（含 body）
 export function listNodes(zone) {
   const dir = nodesDir(zone);
@@ -60,20 +92,24 @@ export function listNodes(zone) {
     .filter(f => f.endsWith(".md"))
     .map(f => {
       const raw = fs.readFileSync(path.join(dir, f), "utf8");
-      const fallback = f.replace(/\.md$/, "");
-      return markdownToNode(raw, fallback);
+      // fallback id：优先用 frontmatter 的 id，缺省时用文件名去掉 __标题 部分
+      const fallback = f.replace(/\.md$/, "").split("__")[0];
+      return sanitizeNode(markdownToNode(raw, fallback), zone);
     });
 }
 
-// 按 id 查找节点；返回 { node, zone, file } 或 null
+// 按 id 查找节点；返回 { node, zone, file } 或 null。
+// 不依赖文件名：扫描目录，按 frontmatter 里的 id 匹配（文件名可任意，方便手动建节点）。
 export function findNode(id) {
   for (const zone of [ZONE.WORKSPACE, ZONE.CONFIRMED]) {
     const dir = nodesDir(zone);
     if (!fs.existsSync(dir)) continue;
-    const file = path.join(dir, `${safeName(id)}.md`);
-    if (fs.existsSync(file)) {
+    for (const f of fs.readdirSync(dir)) {
+      if (!f.endsWith(".md")) continue;
+      const file = path.join(dir, f);
       const raw = fs.readFileSync(file, "utf8");
-      return { node: markdownToNode(raw, id), zone, file };
+      const node = sanitizeNode(markdownToNode(raw, f.replace(/\.md$/, "").split("__")[0]), zone);
+      if (node.id === id) return { node, zone, file };
     }
   }
   return null;
@@ -82,7 +118,7 @@ export function findNode(id) {
 function writeNodeFile(zone, node) {
   const dir = nodesDir(zone);
   fs.mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, `${safeName(node.id)}.md`);
+  const file = path.join(dir, nodeFileName(node));
   fs.writeFileSync(file, nodeToMarkdown(node), "utf8");
   return file;
 }
@@ -103,9 +139,9 @@ export function updateNode(id, patch) {
   if (patch.body !== undefined) next.body = patch.body;
   // status 变更可能意味着跨区，交给 moveNode 处理
   const targetZone = next.status && next.status !== found.zone ? next.status : found.zone;
-  writeNodeFile(targetZone, next);
-  // 若区域改变，删除旧文件（先写后删，避免中断丢失）
-  if (targetZone !== found.zone) {
+  const newFile = writeNodeFile(targetZone, next);
+  // 标题变化（文件名变化）或跨区（路径变化）时，删除旧文件（先写后删，避免中断丢失）
+  if (newFile !== found.file) {
     fs.rmSync(found.file, { force: true });
   }
   return next;
@@ -167,7 +203,54 @@ export function listEdges() {
     const rels = readJson(path.join(zoneDir(zone), "relations.json")) || [];
     all.push(...rels);
   }
-  return all;
+  // 动态合成 md 正文 [[标题]] 引用边（不落盘，单一数据源在正文），补充 relations.json 里没有的关系
+  const existing = new Set(all.map(e => `${e.source}->${e.target}`));
+  const refs = referenceEdges().filter(e => !existing.has(`${e.source}->${e.target}`));
+  return [...all, ...refs];
+}
+
+// 从所有节点正文提取 [[引用]] 合成"引用边"。
+// 引用目标支持三种写法：标题、id、完整文件名(id__标题)。标题重复时取第一个匹配；引用不存在的节点或自身时跳过。
+function referenceEdges() {
+  const nodes = [...listNodes(ZONE.WORKSPACE), ...listNodes(ZONE.CONFIRMED)];
+  const byTitle = new Map();
+  const idSet = new Set();
+  nodes.forEach(n => {
+    const t = (n.title || "").trim();
+    if (t && !byTitle.has(t)) byTitle.set(t, n.id);
+    idSet.add(n.id);
+  });
+  // 解析引用 -> 目标节点 id
+  const resolveRef = (ref) => {
+    if (!ref) return null;
+    // 1) 标题
+    if (byTitle.has(ref)) return byTitle.get(ref);
+    // 2) 直接是 id
+    if (idSet.has(ref)) return ref;
+    // 3) 完整文件名 id__标题
+    const base = ref.split("__")[0];
+    if (idSet.has(base)) return base;
+    return null;
+  };
+  const edges = [];
+  const seen = new Set();
+  for (const n of nodes) {
+    for (const ref of extractReferences(n.body)) {
+      const targetId = resolveRef(ref.target);
+      if (!targetId || targetId === n.id) continue;
+      const key = `${n.id}->${targetId}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      edges.push({
+        id: `ref-${n.id}-${targetId}`,
+        source: n.id,
+        target: targetId,
+        type: "reference",
+        label: ref.label || "引用",
+      });
+    }
+  }
+  return edges;
 }
 
 export function createEdge(data) {

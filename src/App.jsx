@@ -318,7 +318,7 @@ export default function App() {
       summary: "", tags: [], body: "",
     };
     api.createNode(child).then(newNode =>
-      api.createEdge({ source: selected.id, target: newNode.id, type: "extends", label: "细化" }).then(edge => {
+      api.createEdge({ source: selected.id, target: newNode.id, type: "extends", label: "" }).then(edge => {
         setNodes(prev => [...prev, newNode]);
         setEdges(prev => [...prev, edge]);
         selectNode(newNode.id);
@@ -346,6 +346,13 @@ export default function App() {
   function removeEdge(edgeId) {
     api.deleteEdge(edgeId).then(() => {
       setEdges(prev => prev.filter(e => e.id !== edgeId));
+      flashSave("saved");
+    }).catch(() => flashSave("error"));
+  }
+
+  function updateEdgeLabel(edgeId, label) {
+    api.updateEdge(edgeId, { label }).then(updated => {
+      setEdges(prev => prev.map(e => e.id === edgeId ? updated : e));
       flashSave("saved");
     }).catch(() => flashSave("error"));
   }
@@ -582,6 +589,7 @@ export default function App() {
           onRemoveNode={removeNode}
           onSelectNode={selectNode}
           onRemoveEdge={removeEdge}
+          onUpdateEdge={updateEdgeLabel}
           onClose={() => setInspectorOpen(false)}
         />
       )}

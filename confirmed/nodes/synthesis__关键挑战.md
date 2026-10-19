@@ -1,7 +1,6 @@
 ---
 id: synthesis
-title: 技术路线、能力边界与关键挑战
-short: 关键挑战
+title: 关键挑战
 type: summary
 stage: aug
 level: 1

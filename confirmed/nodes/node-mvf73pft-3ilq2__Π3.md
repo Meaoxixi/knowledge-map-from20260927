@@ -1,5 +1,5 @@
 ---
-title: π³
+title: Π3
 stage: oct
 level: 3
 type: detail

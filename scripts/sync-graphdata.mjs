@@ -27,7 +27,8 @@ function listNodes(dir) {
     .map((f) => {
       const raw = fs.readFileSync(path.join(dir, f), "utf8");
       const { data, content } = matter(raw);
-      const fallbackId = f.replace(/\.md$/, "");
+      // fallback id：文件名去掉 __标题 部分（与 server/store.js 一致）
+      const fallbackId = f.replace(/\.md$/, "").split("__")[0];
       return { ...data, id: data.id || fallbackId, body: content };
     });
 }
@@ -41,6 +42,61 @@ const allNodes = [...confirmedNodes, ...workspaceNodes];
 const confirmedEdges = readJson(path.join(ROOT, "confirmed", "relations.json")) || [];
 const workspaceEdges = readJson(path.join(ROOT, "workspace", "relations.json")) || [];
 const allEdges = [...confirmedEdges, ...workspaceEdges];
+
+// 2b) 引用边：从正文 [[引用]] 合成（与 server/store.js 的 referenceEdges 同逻辑，保证在线模式一致）
+// 引用目标支持三种写法：标题、id、完整文件名(id__标题)
+const byTitle = new Map();
+const idSet = new Set();
+allNodes.forEach((n) => {
+  const t = (n.title || "").trim();
+  if (t && !byTitle.has(t)) byTitle.set(t, n.id);
+  idSet.add(n.id);
+});
+const extractRefs = (body) => {
+  if (!body) return [];
+  const seen = new Set();
+  const re = /\[\[([^\]]+)\]\]/g;
+  const out = [];
+  let m;
+  while ((m = re.exec(body))) {
+    const raw = m[1].trim();
+    if (!raw) continue;
+    const pipe = raw.indexOf("|");
+    const target = (pipe === -1 ? raw : raw.slice(0, pipe)).trim();
+    const label = pipe === -1 ? "" : raw.slice(pipe + 1).trim();
+    if (target && !seen.has(target)) {
+      seen.add(target);
+      out.push({ target, label });
+    }
+  }
+  return out;
+};
+const resolveRef = (ref) => {
+  if (!ref) return null;
+  if (byTitle.has(ref)) return byTitle.get(ref);
+  if (idSet.has(ref)) return ref;
+  const base = ref.split("__")[0];
+  if (idSet.has(base)) return base;
+  return null;
+};
+const existing = new Set(allEdges.map((e) => `${e.source}->${e.target}`));
+const refSeen = new Set();
+for (const n of allNodes) {
+  for (const ref of extractRefs(n.body)) {
+    const targetId = resolveRef(ref.target);
+    if (!targetId || targetId === n.id) continue;
+    const key = `${n.id}->${targetId}`;
+    if (existing.has(key) || refSeen.has(key)) continue;
+    refSeen.add(key);
+    allEdges.push({
+      id: `ref-${n.id}-${targetId}`,
+      source: n.id,
+      target: targetId,
+      type: "reference",
+      label: ref.label || "引用",
+    });
+  }
+}
 
 // 3) 阶段：从 layout.json
 const layout = readJson(path.join(ROOT, "confirmed", "layout.json")) || {};

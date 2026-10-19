@@ -1,24 +1,17 @@
 [
   {
+    "id": "edge-mvfs27c0-k887i",
+    "source": "model-training",
+    "target": "node-mvf9rvkx-gfr84",
+    "type": "extends",
+    "label": ""
+  },
+  {
     "id": "e14",
     "source": "model",
     "target": "model-training",
     "label": "细化",
     "type": "extends"
-  },
-  {
-    "id": "edge-mvf7f8an-3vuf4",
-    "source": "model-consistency",
-    "target": "node-mvf73pft-3ilq2",
-    "type": "extends",
-    "label": ""
-  },
-  {
-    "id": "edge-mvf7f45o-42kmn",
-    "source": "model-consistency",
-    "target": "node-mvf73r6w-3r0tl",
-    "type": "extends",
-    "label": ""
   },
   {
     "id": "e13",
@@ -31,6 +24,20 @@
     "id": "edge-mvdpum5j-en72d",
     "source": "synthesis",
     "target": "model",
+    "type": "extends",
+    "label": ""
+  },
+  {
+    "id": "edge-mvf7f8an-3vuf4",
+    "source": "model-consistency",
+    "target": "node-mvf73pft-3ilq2",
+    "type": "extends",
+    "label": ""
+  },
+  {
+    "id": "edge-mvf7f45o-42kmn",
+    "source": "model-consistency",
+    "target": "node-mvf73r6w-3r0tl",
     "type": "extends",
     "label": ""
   },

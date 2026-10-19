@@ -19,3 +19,25 @@ export function markdownToNode(md, fallbackId) {
   if (node.schemaVersion === undefined) node.schemaVersion = SCHEMA_VERSION;
   return node;
 }
+
+// 从正文提取 Obsidian 风格的 [[目标]] 或 [[目标|显示文字]] 引用。
+// 返回 [{ target, label }] 数组（按出现顺序，target 去重）。label 为 | 后的文字，缺省为空串。
+export function extractReferences(body) {
+  if (!body) return [];
+  const seen = new Set();
+  const re = /\[\[([^\]]+)\]\]/g;
+  const out = [];
+  let m;
+  while ((m = re.exec(body))) {
+    const raw = m[1].trim();
+    if (!raw) continue;
+    const pipe = raw.indexOf("|");
+    const target = (pipe === -1 ? raw : raw.slice(0, pipe)).trim();
+    const label = pipe === -1 ? "" : raw.slice(pipe + 1).trim();
+    if (target && !seen.has(target)) {
+      seen.add(target);
+      out.push({ target, label });
+    }
+  }
+  return out;
+}

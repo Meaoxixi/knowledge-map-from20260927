@@ -63,6 +63,11 @@
 .connection-row>button:first-child:hover{background:var(--panel2)}
 .conn-del{display:grid;place-items:center;width:24px;height:24px;border:0;background:transparent;color:var(--muted);border-radius:5px;flex-shrink:0}
 .conn-del:hover{color:#e08a80;background:#b5544a22}
+.conn-edit{display:grid;place-items:center;width:24px;height:24px;border:0;background:transparent;color:var(--muted);border-radius:5px;flex-shrink:0}
+.conn-edit:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.edge-edit-row{display:flex;align-items:center;gap:6px;width:100%;margin:2px 0 8px;padding-left:3px}
+.edge-edit-row .tags-input{flex:1;min-width:0}
+.edge-edit-row .mini-toggle{flex-shrink:0}
 .status-pulse.saving{background:#e8c98b;box-shadow:0 0 8px #e8c98b55}
 .status-pulse.saved{background:#7ddac7;box-shadow:0 0 8px #7ddac755}
 .status-pulse.error{background:#e08a80;box-shadow:0 0 8px #e08a8055}

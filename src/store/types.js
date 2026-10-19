@@ -17,6 +17,7 @@ export const EDGE_TYPES = {
   implements: "实现",
   evaluates: "评测",
   feedback: "反馈/修正",
+  reference: "引用",
 };
 
 // 节点视觉分类（保留原有语义缩放与配色）

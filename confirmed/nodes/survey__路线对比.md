@@ -1,7 +1,6 @@
 ---
 id: survey
-title: 工业界与学术界路线对比
-short: 路线对比
+title: 路线对比
 type: topic
 stage: aug
 level: 1
