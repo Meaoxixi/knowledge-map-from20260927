@@ -1,5 +1,5 @@
 // 左侧时间轴栏：按"年份-月份"自动生成时间线（数据来自笔记日期），点击聚焦该月；底部大终点=显示全部。
-export default function Rail({ months, focusMonth, onSelectMonth, onFocusAll }) {
+export default function Rail({ months, focusMonth, onSelectMonth, onFocusAll, view = "graph" }) {
   return (
     <aside className="rail">
       <div className="brand-mark">K<span>.</span></div>
@@ -9,7 +9,7 @@ export default function Rail({ months, focusMonth, onSelectMonth, onFocusAll }) 
         {months.map((m) => (
           <button
             key={m}
-            className={`time-item ${focusMonth === m ? "active" : ""}`}
+            className={`time-item ${focusMonth === m ? "active" : ""} ${focusMonth === m && view === "star" ? "star-active" : ""}`}
             onClick={() => onSelectMonth(m)}
             title={m}
           >
@@ -18,7 +18,7 @@ export default function Rail({ months, focusMonth, onSelectMonth, onFocusAll }) 
           </button>
         ))}
         <button
-          className="rail-endpoint"
+          className={`rail-endpoint ${focusMonth === null ? "active" : ""} ${view === "star" && focusMonth === null ? "star-active" : ""}`}
           onClick={onFocusAll}
           title="显示全部节点"
         >
