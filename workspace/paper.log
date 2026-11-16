@@ -1,0 +1,109 @@
+# Cosmos-Predict2.5
+> NVIDIA
+> 2511.00062
+证明"视频基础模型-Built on a flow-based architecture + 物理 AI VLM grounding + RL 后训练"可在单一架构内收敛多模态世界生成，为世界模型作为物理 AI 通用骨干提供了工程范式。
+三大改进：
+> 1. 强化了数据过滤流水线，定制了后训练数据
+>    ① 视频感知的视频分割；② 基于GPU的转码；③ 视频裁剪；④ 过滤（美学评分 + 运动幅度过滤 + OCR过滤 + Dover感知质量过滤 + VTSS语义伪影 + VLM）；⑤ 字幕生成； ⑥ 语义去重；⑦ 分片处理
+> 3. 简化模型架构，统一text2World、Image2World和Video2World
+> 4. 训练修改：合并模型+新的强化算法进行后训练
+
+# LingBot-VA
+Robbyant
+2601.21998
+文档一·方向二：统一动作空间
+3
+LingBot-VA 2.0
+Robbyant
+2607.08639
+文档一·方向二：统一动作空间
+4
+Qwen-RobotWorld
+阿里 Qwen Team
+2606.17030
+文档一·方向三：语言/语义统一接口
+5
+GeniWorld
+清华深圳 + 腾讯 Robotics X
+2608.06332
+文档一·方向四：视觉化渲染；文档二·方向二：空间图/通道拼接（交叉引用）
+6
+GE-Sim 2.0
+智元 AgiBot
+2605.27491
+文档一·方向四：视觉化渲染
+7
+Hydra-0
+NVIDIA
+2608.18077
+文档一·方向四：视觉化渲染
+8
+OSCAR
+北大、密歇根大学 + NVIDIA
+2606.04463
+文档一·方向四：视觉化渲染
+9
+Cosmos3
+NVIDIA
+2606.02800
+文档一·方向五：原生多本体分域投影
+10
+DreamDojo
+NVIDIA
+2602.06949
+文档二·方向一：全局调制注入
+11
+LingBot-World
+Robbyant
+2601.20540
+文档二·方向一：全局调制注入
+12
+ABot-PhysWorld
+阿里 AMAP CV Lab
+2603.23376
+文档二·方向二：空间图/通道拼接
+13
+EnerVerse-AC
+智元 AgiBot
+2505.09723
+文档二·方向二：空间图/通道拼接
+14
+GigaWorld-1
+GigaAI + 清华大学
+2607.02642
+文档二·方向二：空间图/通道拼接
+15
+Ctrl-World
+Stanford + 清华
+2510.10125
+文档二·方向三：交叉注意力 token
+16
+BWM
+BLM-Lab
+2607.29302
+文档二·方向三：交叉注意力 token
+17
+DreamX-Phi 1.0
+阿里 AMAP-ML
+2608.13489
+文档二·方向四：几何编码直接进注意力
+18
+SolarWM
+CUHK-SZ
+2609.02886
+文档二·方向四：几何编码直接进注意力
+19
+DreamX-World 1.0
+DreamX Team
+2606.16993
+文档二·方向四：几何编码直接进注意力
+20
+AnyWorld
+NTU、A*STAR、小鹏机器人、浙大 + CUHK
+2608.29242
+文档二·方向五：多因子解耦/因子化条件
+21
+SC3-Eval
+多伦多大学、NVIDIA + Physical Intelligence
+2606.18610
+文档二·方向五：多因子解耦/因子化条件
